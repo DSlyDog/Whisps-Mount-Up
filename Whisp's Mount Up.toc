@@ -1,6 +1,6 @@
-## Interface: 110105
+## Interface: 110200
 ## Title: Whisp's Mount Up
-## Version: 1.0-GUI_Beta
+## Version: 1.1.1-GUI_Beta
 ## Notes: Multiple favorites lists, and multiple ways to mount up
 ## Author: Whisp Reedwell
 ## DefaultState: enabled

@@ -1,5 +1,12 @@
-local SummonFrame = CreateFrame("Frame", "WhispsMountupSummonFrame", UIParent, "BackdropTemplate")
+local SummonParent = CreateFrame("Frame", "WhispsMountupSummonParent", UIParent)
+SummonParent:SetFrameStrata("MEDIUM")
+SummonParent:SetFrameLevel(100)
+SummonParent:SetAllPoints(UIParent)
+
+local SummonFrame = CreateFrame("Frame", "WhispsMountupSummonFrame", SummonParent, "BackdropTemplate")
 SummonFrame:SetSize(300, 400)
+SummonFrame:SetFrameStrata("MEDIUM")
+SummonFrame:SetFrameLevel(200)
 SummonFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
 SummonFrame:SetMovable(true)
 SummonFrame:EnableMouse(true)
@@ -56,7 +63,7 @@ closeButton:SetScript("OnClick", function() SummonFrame:Hide() end)
 local mountListDropdown = CreateFrame("Frame", "WhispsMountupSummonDropdown", SummonFrame, "UIDropDownMenuTemplate")
 mountListDropdown:SetPoint("TOP", titleBar, "BOTTOM", -12, -10)
 
-function InitializeMountListDropdown(self, level)
+local function InitializeMountListDropdown(self, level)
     local info = UIDropDownMenu_CreateInfo()
 
     local summonMethods = {
@@ -92,11 +99,11 @@ noListText:SetPoint("CENTER", SummonFrame, "CENTER", 0, 0)
 noListText:SetText("No mount lists available")
 noListText:Hide()
 
-local scrollFrame = CreateFrame("ScrollFrame", "WhispsMountupScrollFrame", SummonFrame, "UIPanelScrollFrameTemplate")
+local scrollFrame = CreateFrame("ScrollFrame", "WhispsMountupSummonScrollFrame", SummonFrame, "UIPanelScrollFrameTemplate")
 scrollFrame:SetSize(SummonFrame:GetWidth(), SummonFrame:GetHeight() - 100)
 scrollFrame:SetPoint("TOPLEFT", mountListDropdown, "BOTTOMLEFT", -70, 0)
 
-local contentFrame = CreateFrame("Frame", "WhispsMountupContentFrame", scrollFrame)
+local contentFrame = CreateFrame("Frame", "WhispsMountupSummonContentFrame", scrollFrame)
 contentFrame:SetSize(scrollFrame:GetWidth() - 16, 1)
 scrollFrame:SetScrollChild(contentFrame)
 
@@ -154,7 +161,7 @@ function UpdateList()
 
     for i, listName in ipairs(mountListNames) do
         if MountSet[listName] and #MountSet[listName] > 0 then
-            local button = CreateFrame("Button", "WhispsMountupSummonButton" .. i, contentFrame, "BackdropTemplate")
+            local button = CreateFrame("Button", "WhispsMountupSummonListButton" .. i, contentFrame, "BackdropTemplate")
             button:SetSize(buttonWidth, buttonHeight)
             button:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 50, -yOffset)
 
@@ -221,5 +228,6 @@ SlashCmdList.QUICKMOUNT = function()
         SummonFrame:Hide()
     else
         UIDropDownMenu_Initialize(mountListDropdown, InitializeMountListDropdown)
+        SummonFrame:Show()
     end
 end

@@ -1,7 +1,7 @@
 function ShowMountSelectionDialog(listName)
     if not WhispsMountupSelectionFrame then
         local mountSelectFrame = CreateFrame("Frame", "WhispsMountupSelectionFrame", UIParent, "BackdropTemplate")
-        mountSelectFrame:SetSize(300, 400)
+        mountSelectFrame:SetSize(320, 450)
         mountSelectFrame:SetPoint("CENTER")
         mountSelectFrame:SetFrameStrata("DIALOG")
         mountSelectFrame:SetMovable(true)
@@ -49,8 +49,46 @@ function ShowMountSelectionDialog(listName)
         closeButton:SetPoint("TOPRIGHT", titleBar, "TOPRIGHT", 0, 0)
         closeButton:SetScript("OnClick", function() mountSelectFrame:Hide() end)
 
+        local mountListDropdown = CreateFrame("Frame", "WhispsMountupAddDropdown", mountSelectFrame, "UIDropDownMenuTemplate")
+        mountListDropdown:SetPoint("TOP", titleBar, "BOTTOM", 0, -15)
+
+        local function InitializeMountListDropdown(self, level)
+            local info = UIDropDownMenu_CreateInfo()
+
+            local summonMethods = {
+                { text = "Alphabetical", value = "Alphabetical", description = "Sorts your mounts by name from A to Z" },
+                { text = "Reverse Alphabetical", value = "Reverse Alphabetical", description = "Sorts your mounts by name from Z to A"},
+                { text = "Newest to WoW", value = "Newest to WoW", description = "Sorts your mounts by when they were introduced" },
+            }
+
+            for _, method in ipairs(summonMethods) do
+                info.text = method.text
+                info.value = method.value
+                info.tooltipTitle = method.text
+                info.tooltipText = method.description
+                info.func = function(self)
+                    UIDropDownMenu_SetSelectedValue(mountListDropdown, self.value)
+                    UIDropDownMenu_SetText(mountListDropdown, self.value)
+                    CloseDropDownMenus()
+                    if mountSelectFrame.PopulateMounts then
+                        mountSelectFrame.PopulateMounts()
+                    end
+                end
+                info.checked = (UIDropDownMenu_GetSelectedValue(mountListDropdown) == method)
+                info.notCheckable = false
+                UIDropDownMenu_AddButton(info, level)
+            end
+        end
+
+        UIDropDownMenu_Initialize(mountListDropdown, InitializeMountListDropdown)
+        UIDropDownMenu_SetWidth(mountListDropdown, 160)
+        UIDropDownMenu_SetButtonWidth(mountListDropdown, 174)
+        UIDropDownMenu_JustifyText(mountListDropdown, "LEFT")
+        UIDropDownMenu_SetSelectedValue(mountListDropdown, nil)
+        UIDropDownMenu_SetText(mountListDropdown, "Sort type...")
+
         local scrollFrame = CreateFrame("ScrollFrame", nil, mountSelectFrame, "UIPanelScrollFrameTemplate")
-        scrollFrame:SetPoint("TOPLEFT", 15, -40)
+        scrollFrame:SetPoint("TOPLEFT", 15, -80)
         scrollFrame:SetPoint("BOTTOMRIGHT", -35, 50)
 
         local content = CreateFrame("Frame", nil, scrollFrame)
@@ -81,9 +119,19 @@ function ShowMountSelectionDialog(listName)
             local collectedMounts = {}
             for i, mountID in ipairs(mounts) do
                 local name, spellID, icon, _, _, _, _, _, _, _, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+                local _, _, _, _, _, _, _, _, _, mountType = C_MountJournal.GetMountInfoExtraByID(mountID)
                 if isCollected then
-                    table.insert(collectedMounts, {id = mountID, name = name, icon = icon})
+                    table.insert(collectedMounts, {id = mountID, name = name, icon = icon, mountType = mountType})
                 end
+            end
+
+            local selectedSortMethod = UIDropDownMenu_GetSelectedValue(mountListDropdown)
+            if selectedSortMethod == "Alphabetical" then
+                table.sort(collectedMounts, function(a, b) return a.name < b.name end)
+            elseif selectedSortMethod == "Reverse Alphabetical" then
+                table.sort(collectedMounts, function(a, b) return a.name > b.name end)
+            elseif selectedSortMethod == "Newest to WoW" then
+                table.sort(collectedMounts, function(a, b) return a.id > b.id end)
             end
 
             local totalHeight = #collectedMounts * buttonHeight
@@ -91,7 +139,7 @@ function ShowMountSelectionDialog(listName)
 
             for i, mountInfo in ipairs(collectedMounts) do
                 local yOffset = -(i-1) * buttonHeight
-                local button = CreateFrame("Button", "WhispsMountupMount" .. i, content, "BackdropTemplate")
+                local button = CreateFrame("Button", "WhispsMountupSelectButton" .. i, content, "BackdropTemplate")
                 button:SetSize(content:GetWidth() - 10, buttonHeight)
                 button:SetPoint("TOPLEFT", content, "TOPLEFT", 5, yOffset)
                 button:SetPoint("TOPRIGHT", content, "TOPRIGHT", -5, yOffset)

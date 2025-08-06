@@ -199,7 +199,6 @@ local function init(event, table, name)
 
 		tinsert(UISpecialFrames, "WhispsMountupFrame")
 		tinsert(UISpecialFrames, "WhispsMountupSelectionFrame")
-		tinsert(UISpecialFrames, "WhispsMountupSummonFrame")
 	end
 end
 

@@ -1,6 +1,8 @@
 -- Frame Creation
 local MountUpFrame = CreateFrame("Frame", "WhispsMountupFrame", UIParent, "BackdropTemplate")
 MountUpFrame:SetSize(420, 500)
+MountUpFrame:SetFrameStrata("MEDIUM")
+MountUpFrame:SetFrameLevel(50)
 MountUpFrame:SetPoint("CENTER")
 MountUpFrame:SetMovable(true)
 MountUpFrame:EnableMouse(true)
@@ -201,11 +203,11 @@ local mountListLabel = MountUpFrame:CreateFontString(nil, "OVERLAY", "GameFontNo
 mountListLabel:SetPoint("TOPLEFT", mountListDropdown, "BOTTOMLEFT", 20, -15)
 mountListLabel:SetText("Mounts in this list:")
 
-local scrollFrame = CreateFrame("ScrollFrame", "WhispsMountupScrollFrame", MountUpFrame, "UIPanelScrollFrameTemplate")
+local scrollFrame = CreateFrame("ScrollFrame", "WhispsMountupMainScrollFrame", MountUpFrame, "UIPanelScrollFrameTemplate")
 scrollFrame:SetSize(350, 320)
 scrollFrame:SetPoint("TOPLEFT", mountListLabel, "BOTTOMLEFT", 0, -10)
 
-local contentFrame = CreateFrame("Frame", "WhispsMountupContentFrame", scrollFrame)
+local contentFrame = CreateFrame("Frame", "WhispsMountupMainContentFrame", scrollFrame)
 contentFrame:SetSize(scrollFrame:GetWidth() - 16, 1)
 scrollFrame:SetScrollChild(contentFrame)
 
