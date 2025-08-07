@@ -100,9 +100,12 @@ function ShowMountSelectionDialog(listName)
         confirmButton:SetPoint("BOTTOM", 0, 15)
         confirmButton:SetText("Add Selected")
         confirmButton:SetScript("OnClick", function()
-            if listName then
-                addMount(listName, mountSelectFrame.selectedMounts)
-                UpdateMountList(listName)
+            local targetList = mountSelectFrame.targetListName
+            if targetList then
+                addMount(targetList, mountSelectFrame.selectedMounts)
+                UpdateMountList(targetList)
+                
+                mountSelectFrame.selectedMounts = {}
                 
                 if UpdateList then
                     UpdateList()
@@ -199,6 +202,8 @@ function ShowMountSelectionDialog(listName)
         end
     end
 
+    WhispsMountupSelectionFrame.targetListName = listName
+    
     WhispsMountupSelectionFrame.PopulateMounts()
     WhispsMountupSelectionFrame:Show()
 end

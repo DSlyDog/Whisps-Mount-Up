@@ -81,6 +81,9 @@ local function InitializeMountListDropdown(self, level)
                 local dropdownFrame = WhispsMountupListDropdown
                 UIDropDownMenu_SetSelectedValue(dropdownFrame, self.value)
                 UIDropDownMenu_SetText(dropdownFrame, self.value)
+                
+                MountUpFrame.selectedMounts = {}
+                
                 UpdateMountList(self.value)
                 CloseDropDownMenus()
             end
@@ -225,6 +228,8 @@ MountUpFrame:SetScript("OnShow", function()
     mountListLabel:Hide()
     scrollFrame:Hide()
 
+    MountUpFrame.selectedMounts = {}
+
     local selectedList = UIDropDownMenu_GetSelectedValue(mountListDropdown)
     if selectedList then
         UpdateMountList(selectedList)
@@ -367,16 +372,6 @@ function UpdateMountList(listName)
 
             button:SetScript("OnClick", function(self, buttonType, down)
                 if not MountUpFrame.selectedMounts then
-                    MountUpFrame.selectedMounts = {}
-                end
-
-                if not IsControlKeyDown() then
-                    for _, child in ipairs(contentFrame:GetChildren()) do
-                        if child.isHighlighted then
-                            child:UnlockHighlight()
-                            child.isHighlighted = false
-                        end
-                    end
                     MountUpFrame.selectedMounts = {}
                 end
 
