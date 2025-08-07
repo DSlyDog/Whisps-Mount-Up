@@ -1,5 +1,5 @@
 local SettingsFrame = CreateFrame("Frame", "WhispsMountupSettingsFrame", UIParent, "BackdropTemplate")
-SettingsFrame:SetSize(320, 240)
+SettingsFrame:SetSize(330, 240)
 SettingsFrame:SetFrameStrata("MEDIUM")
 SettingsFrame:SetFrameLevel(300)
 SettingsFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
@@ -96,7 +96,7 @@ combatDismountCheckbox:SetSize(20, 20)
 
 local combatDismountLabel = SettingsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 combatDismountLabel:SetPoint("LEFT", combatDismountCheckbox, "RIGHT", 5, 0)
-combatDismountLabel:SetText("Auto-dismount in combat (ground only)")
+combatDismountLabel:SetText("Auto-dismount in combat (when grounded)")
 
 combatDismountCheckbox:SetScript("OnClick", function(self)
     WhispsMountupDB.settings.combatDismount = self:GetChecked()
