@@ -298,6 +298,17 @@ function ToggleCustomActionBar()
     SaveActionBarState()
 end
 
+local mountJournalFrame = CreateFrame("Frame")
+mountJournalFrame:RegisterEvent("COMPANION_LEARNED")
+mountJournalFrame:RegisterEvent("COMPANION_UNLEARNED") 
+mountJournalFrame:SetScript("OnEvent", function(self, event, ...)
+    for _, slot in ipairs(actionBarSlots) do
+        if slot.listName then
+            UpdateSlotDisplay(slot)
+        end
+    end
+end)
+
 function InitActionBar()
     InitializeActionBarDB()
     LoadActionBarState()

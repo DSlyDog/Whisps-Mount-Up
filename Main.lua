@@ -17,7 +17,7 @@ local function HandleCombatStart()
 end
 
 local combatFrame = CreateFrame("Frame")
-combatFrame:RegisterEvent("PLAYER_REGEN_DISABLED") -- Entering combat
+combatFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
 combatFrame:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_REGEN_DISABLED" then
         HandleCombatStart()
@@ -221,6 +221,7 @@ local function init(event, table, name)
 		InitializeMinimapIcon()
         InitActionBar()
         InitializeSettingsGUI()
+        InitializeSummonGUI()
 
 		tinsert(UISpecialFrames, "WhispsMountupFrame")
 		tinsert(UISpecialFrames, "WhispsMountupSelectionFrame")

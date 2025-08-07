@@ -15,9 +15,7 @@ SummonFrame:SetScript("OnDragStart", SummonFrame.StartMoving)
 SummonFrame:SetScript("OnDragStop", SummonFrame.StopMovingOrSizing)
 SummonFrame:Hide()
 
--- Add this to the SummonFrame setup
 SummonFrame:SetScript("OnHide", function()
-    -- Clean up any ongoing drag operation
     if isDragActive then
         isDragActive = false
         draggedListName = nil
@@ -27,7 +25,6 @@ SummonFrame:SetScript("OnHide", function()
     UpdateList()
 end)
 
--- Visual Elements
 if BackdropTemplateMixin then
     Mixin(SummonFrame, BackdropTemplateMixin)
 end
@@ -108,7 +105,6 @@ end
 
 SummonFrame:SetScript("OnShow", function()
     UpdateList()
-    -- Only reinitialize if not already set up
     if not UIDropDownMenu_GetSelectedValue(mountListDropdown) then
         UIDropDownMenu_Initialize(mountListDropdown, InitializeMountListDropdown)
     end
@@ -120,6 +116,14 @@ UIDropDownMenu_SetButtonWidth(mountListDropdown, 174)
 UIDropDownMenu_JustifyText(mountListDropdown, "LEFT")
 UIDropDownMenu_SetSelectedValue(mountListDropdown, nil)
 UIDropDownMenu_SetText(mountListDropdown, "Select summon type...")
+
+function InitializeSummonGUI()
+    if WhispsMountupDB and WhispsMountupDB["selectedSummonMethod"] then
+        local savedMethod = WhispsMountupDB["selectedSummonMethod"]
+        UIDropDownMenu_SetSelectedValue(mountListDropdown, savedMethod.value)
+        UIDropDownMenu_SetText(mountListDropdown, savedMethod.value)
+    end
+end
 
 local noListText = SummonFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 noListText:SetPoint("CENTER", SummonFrame, "CENTER", 0, 0)
@@ -161,7 +165,7 @@ local mountListButtons = {}
 
 local function ShowSlotAssignmentPopup(listName, x, y)
     local popup = CreateFrame("Frame", "WhispsMountupSlotPopup", UIParent, "BackdropTemplate")
-    popup:SetSize(280, 320)  -- Made wider and taller for better spacing
+    popup:SetSize(280, 320)
     popup:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x, y)
     popup:SetFrameStrata("TOOLTIP")
     popup:SetFrameLevel(1000)
@@ -184,7 +188,7 @@ local function ShowSlotAssignmentPopup(listName, x, y)
     local titleBar = CreateFrame("Frame", nil, popup, "BackdropTemplate")
     titleBar:SetPoint("TOPLEFT", popup, "TOPLEFT", 2.5, 0)
     titleBar:SetPoint("TOPRIGHT", popup, "TOPRIGHT", 0, 0)
-    titleBar:SetHeight(28)  -- Made taller to match other panels
+    titleBar:SetHeight(28)
 
     titleBar:SetBackdrop({
         bgFile = "Interface/Tooltips/UI-Tooltip-Background",
@@ -215,7 +219,7 @@ local function ShowSlotAssignmentPopup(listName, x, y)
     for i = 1, 8 do
         local slotButton = CreateFrame("Button", nil, popup, "UIPanelButtonTemplate")
         slotButton:SetSize(buttonWidth, buttonHeight)
-        slotButton:SetPoint("TOP", subtitle, "BOTTOM", 0, -15 - (i-1) * (buttonHeight + 4))  -- More spacing between buttons
+        slotButton:SetPoint("TOP", subtitle, "BOTTOM", 0, -15 - (i-1) * (buttonHeight + 4))
 
         local currentSlot = actionBarSlots[i]
         local buttonText = "Slot " .. i
@@ -292,7 +296,6 @@ function UpdateList()
             button:SetSize(buttonWidth, buttonHeight)
             button:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 50, -yOffset)
 
-            -- Button setup code (backdrop, icon, etc.)
             button:SetBackdrop({
                 bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
                 edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
@@ -317,15 +320,12 @@ function UpdateList()
             label:SetText(listName)
             label:SetJustifyH("LEFT")
 
-            -- Simple drag detection using timers
             button:SetScript("OnMouseDown", function(self, mouseButton)
                 if mouseButton == "LeftButton" then
                     dragStartTime = GetTime()
                     draggedListName = listName
                     
-                    -- Use a timer to start drag after 0.3 seconds
                     C_Timer.After(0.3, function()
-                        -- Check if we're still holding down the button on this specific button
                         if IsMouseButtonDown("LeftButton") and draggedListName == listName and not isDragActive then
                             isDragActive = true
                             _G.WHISPS_DRAGGED_LIST = listName
@@ -337,7 +337,6 @@ function UpdateList()
 
             button:SetScript("OnMouseUp", function(self, mouseButton)
                 if mouseButton == "LeftButton" then
-                    -- Regular click (summon mount)
                     local summonMethod = UIDropDownMenu_GetSelectedValue(mountListDropdown)
                     if summonMethod == "Random" then
                         randomMount(listName)
@@ -355,7 +354,6 @@ function UpdateList()
                         StaticPopup_Show("WHISPS_MOUNTUP_NO_SMETHOD")
                     end
                 elseif mouseButton == "RightButton" then
-                    -- Right-click: show slot assignment popup
                     local x, y = GetCursorPosition()
                     local scale = UIParent:GetEffectiveScale()
                     ShowSlotAssignmentPopup(listName, x/scale, y/scale)
@@ -387,7 +385,6 @@ end
 HookMountFunction()
 UpdateList()
 
--- Commands
 SLASH_QUICKMOUNT1 = "/qm"
 SLASH_QUICKMOUNT2 = "/quickmount"
 SlashCmdList.QUICKMOUNT = function()
