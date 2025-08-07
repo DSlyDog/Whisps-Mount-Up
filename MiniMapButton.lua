@@ -18,19 +18,34 @@ local WhispsMountupLauncher = ldb:NewDataObject("WhispsMountup", {
     type = "launcher",
     icon = "Interface\\ICONS\\foxmounticon",
     OnClick = function(self, button)
-        if WhispsMountupSummonFrame then
-            if WhispsMountupSummonFrame:IsShown() then
-                WhispsMountupSummonFrame:Hide()
-            else
-                UIDropDownMenu_Initialize(WhispsMountupSummonDropdown, InitializeMountListDropdown)
-                WhispsMountupSummonFrame:Show()
+        if button == "LeftButton" then
+            if WhispsMountupSummonFrame then
+                if WhispsMountupSummonFrame:IsShown() then
+                    WhispsMountupSummonFrame:Hide()
+                else
+                    UIDropDownMenu_Initialize(WhispsMountupSummonDropdown, InitializeMountListDropdown)
+                    WhispsMountupSummonFrame:Show()
+                end
+            end
+        elseif button == "RightButton" then
+            if WhispsMountupSettingsFrame then
+                if WhispsMountupSettingsFrame:IsShown() then
+                    WhispsMountupSettingsFrame:Hide()
+                else
+                    if ShowSettingsGUI then
+                        ShowSettingsGUI()
+                    end
+                end
+            elseif ShowSettingsGUI then
+                ShowSettingsGUI()
             end
         end
     end,
     OnTooltipShow = function(tooltip)
         if not tooltip or not tooltip.AddLine then return end
         tooltip:AddLine("Whisp's Mount Up")
-        tooltip:AddLine("Click to open/close the Summon Mounts panel", 1, 1, 1)
+        tooltip:AddLine("|cff00ff00Left-click:|r Open/close Summon Mounts panel", 1, 1, 1)
+        tooltip:AddLine("|cffff8000Right-click:|r Open/close Settings", 1, 1, 1)
     end,
 })
 

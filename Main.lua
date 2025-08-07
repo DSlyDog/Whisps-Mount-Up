@@ -8,6 +8,22 @@ local player = {
 
 }
 
+local function HandleCombatStart()
+    if WhispsMountupDB and WhispsMountupDB.settings and WhispsMountupDB.settings.combatDismount then
+        if IsMounted() and not IsFlying() then
+            Dismount()
+        end
+    end
+end
+
+local combatFrame = CreateFrame("Frame")
+combatFrame:RegisterEvent("PLAYER_REGEN_DISABLED") -- Entering combat
+combatFrame:SetScript("OnEvent", function(self, event)
+    if event == "PLAYER_REGEN_DISABLED" then
+        HandleCombatStart()
+    end
+end)
+
 local function mountCommand(args)
 	local mountIDs = C_MountJournal.GetMountIDs()
 
@@ -33,16 +49,22 @@ local function split (input, regex)
 end
 
 function addMount(category, selectedMounts)
+	if not MountSet[category] then
+		MountSet[category] = {}
+	end
+	
 	for id, mountInfo in pairs(selectedMounts) do
-		if MountSet[category][mountInfo.name] == nil then
-			MountSet[category][mountInfo.name] = mountInfo.id
-			table.insert(MountSet[category], mountInfo.id)
-			if MountSet[category]["count"] == nil then
-				MountSet[category]["count"] = 1
-			else
-				MountSet[category]["count"] = MountSet[category]["count"] + 1
+		local alreadyExists = false
+		for _, existingId in ipairs(MountSet[category]) do
+			if existingId == mountInfo.id then
+				alreadyExists = true
+				print(mountInfo.name .. " is already in the list")
+				break
 			end
-			MountIndexes[category] = MountSet[category]["count"]
+		end
+		
+		if not alreadyExists then
+			table.insert(MountSet[category], mountInfo.id)
 			print("Successfully added " .. mountInfo.name)
 		end
 	end
@@ -72,7 +94,7 @@ function orderedMount(arg)
 	end
 
 	current = MountIndexes[arg]
-	limit = MountSet[arg]["count"]
+	limit = #MountSet[arg]
 
 	if current >= limit then
 		current = 1
@@ -95,24 +117,25 @@ function randomMount(arg)
 		print("That category does not exist")
 		return;
 	end
-	if MountSet[arg]["count"] == nil or MountSet[arg]["count"] == 0 then
+	if #MountSet[arg] == 0 then
 		print("You have not added any mounts")
 		return;
 	end
-	result = math.random(1, MountSet[arg]["count"])
+	result = math.random(1, #MountSet[arg])
 	C_MountJournal.SummonByID(MountSet[arg][result])
 end
 
 function removeMount(category, selectedMounts)
-	for id, mountInfo in pairs(selectedMounts) do
-		if MountSet[category][mountInfo.name] ~= nil then
-			id = MountSet[category][mountInfo.name]
-			MountSet[category][mountInfo.name] = nil;
-			MountSet[category]["count"] = MountSet[category]["count"] - 1;
-			for i, x in ipairs(MountSet[category]) do
-				if x == id then
-					table.remove(MountSet[category], i)
-				end
+	if not MountSet[category] then
+		return
+	end
+	
+	for mountId, mountInfo in pairs(selectedMounts) do
+		for i = #MountSet[category], 1, -1 do
+			if MountSet[category][i] == mountId then
+				table.remove(MountSet[category], i)
+				print("Successfully removed " .. mountInfo.name)
+				break
 			end
 		end
 	end
@@ -196,6 +219,8 @@ local function init(event, table, name)
 
 		registerCommands();
 		InitializeMinimapIcon()
+        InitActionBar()
+        InitializeSettingsGUI()
 
 		tinsert(UISpecialFrames, "WhispsMountupFrame")
 		tinsert(UISpecialFrames, "WhispsMountupSelectionFrame")

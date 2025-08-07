@@ -11,9 +11,6 @@ MountUpFrame:SetScript("OnDragStart", MountUpFrame.StartMoving)
 MountUpFrame:SetScript("OnDragStop", MountUpFrame.StopMovingOrSizing)
 MountUpFrame:Hide()
 
--- Visual Elements
-
-
 if BackdropTemplateMixin then
     Mixin(MountUpFrame, BackdropTemplateMixin)
 end
@@ -54,7 +51,6 @@ closeButton:SetPoint("TOPRIGHT", titleBar, "TOPRIGHT", 0, 0)
 closeButton:SetSize(30, 30)
 closeButton:SetScript("OnClick", function() MountUpFrame:Hide() end)
 
--- Mount Lists Dropdown
 local mountListDropdown = CreateFrame("Frame", "WhispsMountupListDropdown", MountUpFrame, "UIDropDownMenuTemplate")
 mountListDropdown:ClearAllPoints()
 mountListDropdown:SetPoint("TOPLEFT", MountUpFrame, "TOPLEFT", 0, -45)
@@ -119,7 +115,7 @@ newListButton:SetScript("OnClick", function()
         hasEditBox = 1,
         maxLetters = 32,
         OnAccept = function(self)
-            local listName = self.editBox:GetText()
+            local listName = self.EditBox:GetText()
             if listName and listName ~= "" then
                 MountSet = MountSet or {}
                 if MountSet[listName] then
@@ -143,17 +139,25 @@ newListButton:SetScript("OnClick", function()
                 UIDropDownMenu_SetText(mountListDropdown, listName)
 
                 UpdateMountList(listName)
+                
+                if UpdateList then
+                    UpdateList()
+                end
             end
         end,
         OnShow = function(self)
-            self.editBox:SetFocus()
+            self.EditBox:SetFocus()
         end,
         OnHide = function(self)
-            self.editBox:SetText("")
+            self.EditBox:SetText("")
         end,
         EditBoxOnEnterPressed = function(self)
             local parent = self:GetParent()
-            parent.button1:Click()
+            local dialog = StaticPopupDialogs["WHISPS_MOUNTUP_NEW_LIST"]
+            if dialog and dialog.OnAccept then
+                dialog.OnAccept(parent)
+                parent:Hide()
+            end
         end,
         EditBoxOnEscapePressed = function(self)
             self:GetParent():Hide()
@@ -190,6 +194,12 @@ deleteListButton:SetScript("OnClick", function()
             UIDropDownMenu_Initialize(mountListDropdown, InitializeMountListDropdown)
             UIDropDownMenu_SetSelectedValue(mountListDropdown, nil)
             UIDropDownMenu_SetText(mountListDropdown, "Select mount list...")
+
+            UpdateMountList(nil)
+            
+            if UpdateList then
+                UpdateList()
+            end
         end,
         timeout = 0,
         whileDead = true,
@@ -243,7 +253,16 @@ removeMountButton:SetText("Remove Mounts")
 removeMountButton:SetPoint("RIGHT", bottomButtonContainer, "RIGHT", -5,0)
 
 removeMountButton:SetScript("OnClick", function()
-    if MountUpFrame.selectedMounts == nil or #MountUpFrame.selectedMounts == 0 then
+    if MountUpFrame.selectedMounts == nil then
+        MountUpFrame.selectedMounts = {}
+    end
+    
+    local selectedCount = 0
+    for _ in pairs(MountUpFrame.selectedMounts) do
+        selectedCount = selectedCount + 1
+    end
+    
+    if selectedCount == 0 then
         StaticPopupDialogs["WHISPS_MOUNTUP_REMOVE_NS"] = {
             text = "Please select mounts to remove before pressing the 'Remove Mounts' button!",
             button1 = "Ok",
@@ -257,7 +276,12 @@ removeMountButton:SetScript("OnClick", function()
         return
     end
     removeMount(UIDropDownMenu_GetSelectedValue(mountListDropdown), MountUpFrame.selectedMounts)
+    MountUpFrame.selectedMounts = {}
     UpdateMountList(UIDropDownMenu_GetSelectedValue(mountListDropdown))
+    
+    if UpdateList then
+        UpdateList()
+    end
 end)
 
 removeMountButton:Hide()
@@ -290,6 +314,8 @@ function UpdateMountList(listName)
     if not MountSet or not MountSet[listName] then
         scrollFrame:Hide()
         mountListLabel:Hide()
+        addMountButton:Hide()
+        removeMountButton:Hide()
         return
     end
 
@@ -339,27 +365,27 @@ function UpdateMountList(listName)
             label:SetText(name)
             label:SetJustifyH("LEFT")
 
-            button:SetScript("OnClick", function()
+            button:SetScript("OnClick", function(self, buttonType, down)
                 if not MountUpFrame.selectedMounts then
                     MountUpFrame.selectedMounts = {}
                 end
 
-                if MountUpFrame.selectedMounts[mountId] then
-                    MountUpFrame.selectedMounts[mountId] = nil
-                else
-                    MountUpFrame.selectedMounts[mountId] = {id = mountId, name = name}
-                end
-
-                if button.isHighlighted then
-                    button:UnlockHighlight()
-                    button.isHighlighted = false
-                else
+                if not IsControlKeyDown() then
                     for _, child in ipairs(contentFrame:GetChildren()) do
                         if child.isHighlighted then
                             child:UnlockHighlight()
                             child.isHighlighted = false
                         end
                     end
+                    MountUpFrame.selectedMounts = {}
+                end
+
+                if MountUpFrame.selectedMounts[mountId] then
+                    MountUpFrame.selectedMounts[mountId] = nil
+                    button:UnlockHighlight()
+                    button.isHighlighted = false
+                else
+                    MountUpFrame.selectedMounts[mountId] = {id = mountId, name = name}
                     button:LockHighlight()
                     button.isHighlighted = true
                 end

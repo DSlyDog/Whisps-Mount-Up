@@ -1,6 +1,6 @@
 ## Interface: 110200
 ## Title: Whisp's Mount Up
-## Version: 1.1.1-GUI_Beta
+## Version: 1.2.0
 ## Notes: Multiple favorites lists, and multiple ways to mount up
 ## Author: Whisp Reedwell
 ## DefaultState: enabled
@@ -19,3 +19,5 @@ MainGUI.lua
 MountSelectGUI.lua
 SummonGUI.lua
 MiniMapButton.lua
+CustomActionBar.lua
+SettingsGUI.lua

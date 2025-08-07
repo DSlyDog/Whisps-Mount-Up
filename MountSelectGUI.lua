@@ -103,6 +103,11 @@ function ShowMountSelectionDialog(listName)
             if listName then
                 addMount(listName, mountSelectFrame.selectedMounts)
                 UpdateMountList(listName)
+                
+                if UpdateList then
+                    UpdateList()
+                end
+                
                 mountSelectFrame:Hide()
             end
         end)
