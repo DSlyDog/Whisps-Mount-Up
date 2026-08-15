@@ -1,5 +1,5 @@
 # Set variables
-$SourceDir = "E:\Games\World of Warcraft\_retail_\Interface\AddOns\Whisp's Mount Up - Dev"
+$SourceDir = "D:\Programming\WoW Addons\Favorite-Mounts-Enhanced"
 $ReleaseDir = "E:\Games\World of Warcraft\_retail_\Interface\AddOns\Whisp's Mount Up"
 
 # List of files/folders to exclude from release
